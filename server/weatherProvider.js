@@ -35,15 +35,24 @@ async function getHistoricalData(location, startDate, days) {
   const startTime = new Date(startDate).getTime();
   const oneDay = 86400000; // Number of milliseconds in a day
 
+  // Define possible weather conditions
+  const conditions = ['sunny', 'partly cloudy', 'cloudy', 'light rain', 'fog', 'snow'];
+
   for (let i = 0; i < days; i++) {
     // Calculate the date for each day and format it as "YYYY-MM-DD"
     const date = new Date(startTime + i * oneDay).toISOString().split('T')[0];
+    
+    // Generate random precipitation for some conditions
+    const condition = conditions[i % conditions.length];
+    const hasPrecipitation = ['light rain', 'snow'].includes(condition);
+    
     dummyData.push({
       date,
       tavg: 28.0 + i * 0.1, // Example dummy average temperature
       tmin: 25.0 + i * 0.1, // Example dummy minimum temperature
       tmax: 30.0 + i * 0.1, // Example dummy maximum temperature
-      prcp: null          // No precipitation data for dummy
+      prcp: hasPrecipitation ? Math.random() * 10 : null, // Random precipitation for rain/snow
+      condition // Add weather condition
     });
   }
 

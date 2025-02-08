@@ -72,9 +72,28 @@ Retrieve historical weather data for a specific location and time period.
    npm install
    ```
 
-3. Start the server:
+3. Start both server and client:
    ```bash
+   # Normal start
+   ./restart.sh
+
+   # Start with debug mode enabled
+   DEBUG_MODE=1 ./restart.sh
+   ```
+   This will:
+   - Stop any existing server and client processes
+   - Start the server on port 3000
+   - Start the client on port 3001
+
+   Alternatively, you can start them separately:
+   ```bash
+   # Terminal 1: Start server
+   cd server
    npm start
+
+   # Terminal 2: Start client
+   cd client
+   PORT=3001 npm start
    ```
 
 4. Run tests:
@@ -105,13 +124,64 @@ Retrieve historical weather data for a specific location and time period.
 
 ### Testing
 
-The project uses Jest for testing. Test files are located in the `server/tests` directory:
+The project uses Jest for backend testing and Cypress for frontend E2E testing.
+
+#### Backend Tests
+Test files are located in the `server/tests` directory:
 
 - `server.test.js`: Tests for the main Express application
 - `weatherProvider.test.js`: Tests for the weather provider interface
 - `meteostatAdapter.test.js`: Tests for the Meteostat adapter
 - `cacheLayer.test.js`: Tests for the caching functionality
 - `weather.test.js`: Tests for the weather API endpoints
+
+#### End-to-End Testing
+The project uses Cypress for end-to-end testing of the client application.
+
+##### Setting Up Cypress
+1. Navigate to the client directory:
+   ```bash
+   cd client
+   ```
+
+2. Install Cypress (if not already installed):
+   ```bash
+   npm install --save-dev cypress
+   ```
+
+3. Open Cypress to initialize the folder structure:
+   ```bash
+   npx cypress open
+   ```
+
+##### Running E2E Tests
+1. Ensure both the server and client are running:
+   ```bash
+   # Terminal 1: Start the server
+   cd server
+   npm start
+
+   # Terminal 2: Start the client
+   cd client
+   npm start
+   ```
+
+2. In a new terminal, run Cypress:
+   ```bash
+   cd client
+   npm run cypress:open
+   ```
+
+3. In the Cypress test runner:
+   - Click on "E2E Testing"
+   - Choose your preferred browser
+   - Select `weather_flow.spec.js` to run the integration tests
+
+The E2E tests verify the complete user flow, including:
+- Form input handling
+- API integration
+- Data display
+- Error handling
 
 ## Future Enhancements
 

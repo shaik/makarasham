@@ -19,12 +19,28 @@
  *   }
  */
 async function getHistoricalData(location, startDate, days) {
-  // Stub implementation: return a dummy response
+  // Generate dummy data for the specified number of days
+  const dummyData = [];
+  const startTime = new Date(startDate).getTime();
+  const oneDay = 86400000; // Number of milliseconds in a day
+
+  for (let i = 0; i < days; i++) {
+    // Calculate the date for each day and format it as "YYYY-MM-DD"
+    const date = new Date(startTime + i * oneDay).toISOString().split('T')[0];
+    dummyData.push({
+      date,
+      tavg: 28.0 + i * 0.1, // Example dummy average temperature
+      tmin: 25.0 + i * 0.1, // Example dummy minimum temperature
+      tmax: 30.0 + i * 0.1, // Example dummy maximum temperature
+      prcp: null          // No precipitation data for dummy
+    });
+  }
+
   return {
     location,
     startDate,
     days,
-    data: []  // empty array represents no actual data yet
+    data: dummyData
   };
 }
 

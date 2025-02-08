@@ -12,6 +12,10 @@ const logger = winston.createLogger({
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Mount the weather router
+const weatherRouter = require('./routes/weather');
+app.use('/api/weather', weatherRouter);
+
 // Define the root route that returns a JSON message
 app.get('/', (req, res) => {
   logger.info('GET / called');

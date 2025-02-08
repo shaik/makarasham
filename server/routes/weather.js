@@ -1,4 +1,17 @@
-// weather.js
+/**
+ * weather.js
+ * 
+ * Express router handling weather-related endpoints.
+ * Provides historical weather data based on location and date range.
+ * Includes input validation and caching.
+ * 
+ * @module routes/weather
+ * @requires express
+ * @requires debug
+ * @requires ../weatherProvider
+ * @requires ../utils/cacheLayer
+ */
+
 const express = require('express');
 const router = express.Router();
 const debug = require('debug')('makarasham:weather');
@@ -6,7 +19,18 @@ const debug = require('debug')('makarasham:weather');
 const { getHistoricalData } = require('../weatherProvider');
 const { getCache, setCache } = require('../utils/cacheLayer');
 
-// GET /api/weather
+/**
+ * GET /api/weather
+ * 
+ * Retrieves historical weather data for a specific location and date range.
+ * Validates coordinates and uses caching to improve performance.
+ * 
+ * @param {Object} req.query.lat - Latitude (-90 to 90)
+ * @param {Object} req.query.lon - Longitude (-180 to 180)
+ * @param {Object} req.query.startDate - Start date in YYYY-MM-DD format
+ * @param {Object} req.query.days - Number of days to fetch (default: 10)
+ * @returns {Object} Weather data object or error message
+ */
 router.get('/', async (req, res) => {
   try {
     debug('Received weather request with query params: %O', req.query);

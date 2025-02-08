@@ -1,6 +1,153 @@
-# Makarasham - Historical Weather Data Service
+# Makarasham
 
-Makarasham is a modern web service that provides historical weather data through a clean REST API. The service is built with Node.js and Express, featuring modular architecture, caching capabilities, and comprehensive testing.
+## Project Overview
+
+Makarasham is a historical weather data service designed to assist travelers in planning their trips by providing detailed weather information for specific locations and dates. The application consists of a Node.js/Express backend API and a React-based frontend interface.
+
+The service allows users to:
+- Query historical weather data by latitude and longitude
+- Specify a start date and number of days for the weather history
+- View temperature and precipitation data in a clean, user-friendly interface
+
+## Architecture
+
+- **Frontend**: React.js application with a clean, modern UI
+- **Backend**: Express.js REST API
+- **Testing**: Jest for unit tests, Cypress for E2E testing
+- **CI/CD**: GitHub Actions for automated testing
+
+## Prerequisites
+
+- Node.js (v16 or higher)
+- npm (v7 or higher)
+- Git - Historical Weather Data Service
+
+## Setup and Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/makarasham.git
+   cd makarasham
+   ```
+
+2. Install server dependencies:
+   ```bash
+   cd server
+   npm install
+   ```
+
+3. Install client dependencies:
+   ```bash
+   cd ../client
+   npm install
+   ```
+
+## Running the Application
+
+### Development Mode
+
+You can use our convenience scripts to start both server and client:
+
+```bash
+# Start both server and client
+./restart.sh
+
+# Start server only (with debug logging)
+./restart_server.sh
+```
+
+Or start them separately:
+
+1. Start the server (Port 3000):
+   ```bash
+   cd server
+   npm start
+   ```
+
+2. Start the client (Port 3001):
+   ```bash
+   cd client
+   PORT=3001 npm start
+   ```
+
+### Debug Mode
+
+To run the server with debug logging:
+```bash
+DEBUG=makarasham:* npm start
+```
+
+## Testing
+
+### Unit Tests
+
+1. Server Tests:
+   ```bash
+   cd server
+   npm test
+   ```
+
+2. Client Tests:
+   ```bash
+   cd client
+   npm test
+   ```
+
+### End-to-End Tests
+
+Cypress E2E tests are available in the client directory:
+
+```bash
+cd client
+npm run cypress:open  # Opens Cypress Test Runner
+npm run cypress:run   # Runs tests headlessly
+```
+
+## CI/CD
+
+The project uses GitHub Actions for continuous integration. On every push and pull request to the main branch, it:
+- Installs dependencies
+- Runs server tests
+- Runs client tests
+
+View the workflow configuration in `.github/workflows/test.yml`.
+
+## Known Issues & Future Improvements
+
+1. Current Limitations:
+   - Uses dummy weather data (real API integration pending)
+   - Basic caching implementation
+   - Limited error handling for edge cases
+
+2. Planned Enhancements:
+   - Integration with real weather API
+   - Enhanced data visualization
+   - User authentication
+   - Saved locations feature
+   - Advanced caching mechanism
+
+## Project Structure
+
+```
+makarasham/
+├── client/              # React frontend
+│   ├── cypress/         # E2E tests
+│   ├── public/          # Static files
+│   └── src/            # Source code
+├── server/              # Express backend
+│   ├── routes/         # API routes
+│   ├── utils/          # Utilities
+│   └── tests/         # Unit tests
+└── .github/            # GitHub configurations
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## Project Structure
 

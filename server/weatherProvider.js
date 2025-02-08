@@ -1,22 +1,33 @@
 /**
  * weatherProvider.js
  *
- * This module defines the interface for fetching historical weather data.
- * The exported function getHistoricalData() serves as a stub that returns a dummy response.
+ * Module providing historical weather data functionality.
+ * Currently implements a stub that returns dummy data for testing and development.
  *
- * Parameters:
- *   - location: Object (e.g., { lat: number, lon: number })
- *   - startDate: string or Date representing the start date
- *   - days: integer, number of days to fetch data for
+ * @module weatherProvider
+ */
+
+/**
+ * Fetches historical weather data for a specific location and date range.
+ * Currently returns dummy data with a consistent pattern.
  *
- * Returns:
- *   A Promise that resolves to an object with the following structure:
- *   {
- *     location: <passed location>,
- *     startDate: <passed startDate>,
- *     days: <passed days>,
- *     data: [] // dummy data array
- *   }
+ * @async
+ * @function getHistoricalData
+ * @param {Object} location - The geographical coordinates
+ * @param {number} location.lat - Latitude (-90 to 90)
+ * @param {number} location.lon - Longitude (-180 to 180)
+ * @param {string|Date} startDate - Start date for the weather data
+ * @param {number} days - Number of days to fetch data for
+ * @returns {Promise<Object>} Weather data object
+ * @returns {Object} result.location - The input location object
+ * @returns {string} result.startDate - The input start date
+ * @returns {number} result.days - Number of days requested
+ * @returns {Array<Object>} result.data - Array of daily weather records
+ * @returns {string} result.data[].date - Date in YYYY-MM-DD format
+ * @returns {number} result.data[].tavg - Average temperature
+ * @returns {number} result.data[].tmin - Minimum temperature
+ * @returns {number} result.data[].tmax - Maximum temperature
+ * @returns {number|null} result.data[].prcp - Precipitation amount
  */
 async function getHistoricalData(location, startDate, days) {
   // Generate dummy data for the specified number of days

@@ -1,7 +1,22 @@
+/**
+ * server.js
+ * 
+ * Main entry point for the Makarasham Weather History API server.
+ * Initializes Express server, sets up Winston logging, and mounts API routes.
+ * 
+ * @module server
+ * @requires express
+ * @requires winston
+ * @requires ./routes/weather
+ */
+
 const express = require('express');
 const winston = require('winston');
 
-// Create a logger instance using Winston
+/**
+ * Winston logger configuration
+ * Outputs logs to console with simple formatting
+ */
 const logger = winston.createLogger({
   level: 'info',
   transports: [
@@ -12,22 +27,38 @@ const logger = winston.createLogger({
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Mount the weather router
+/**
+ * Weather API routes
+ * Handles all /api/weather endpoints for historical weather data
+ */
 const weatherRouter = require('./routes/weather');
 app.use('/api/weather', weatherRouter);
 
-// Define the root route that returns a JSON message
+/**
+ * GET /
+ * Root endpoint that confirms the server is running
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with server status message
+ */
 app.get('/', (req, res) => {
   logger.info('GET / called');
   res.status(200).json({ message: "Makarasham API - Server is running" });
 });
 
-// Only start the server if this file is run directly (not required as a module)
+/**
+ * Server initialization
+ * Only starts the server if this file is run directly (not required as a module)
+ * This allows for testing without starting the server
+ */
 if (require.main === module) {
   app.listen(port, () => {
     logger.info(`Server listening on port ${port}`);
   });
 }
 
-// Export the app for testing purposes
+/**
+ * Export Express app for testing
+ * @exports app
+ */
 module.exports = app;

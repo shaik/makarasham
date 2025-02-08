@@ -26,33 +26,87 @@ except ImportError:
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 
-def run_feasibility_test():
-    # Define the location: Koh Phangan (approximate coordinates)
-    lat = 9.7387
-    lon = 100.0603
+def fetch_weather_data(location_name, lat, lon, start_date, end_date):
+    """Fetch weather data for a specific location and date range."""
     location = Point(lat, lon)
-
-    # Define a test date range (e.g., March 10, 2022 to March 20, 2022)
-    start = datetime.datetime(2022, 3, 10)
-    end = datetime.datetime(2022, 3, 20)
-
-    logging.info("Fetching historical weather data for Koh Phangan from %s to %s", start.date(), end.date())
+    
+    # Log request parameters
+    logging.info(f"\nRequest parameters for {location_name}:")
+    logging.info(f"  Location: {location_name}")
+    logging.info(f"  Coordinates: {lat}°, {lon}°")
+    logging.info(f"  Start Date: {start_date.date()}")
+    logging.info(f"  End Date: {end_date.date()}")
+    logging.info(f"  Days Requested: {(end_date - start_date).days}")
     
     try:
-        # Fetch daily historical data
-        data = Daily(location, start, end)
+        data = Daily(location, start_date, end_date)
         data = data.fetch()
+        if data.empty:
+            logging.error(f"No data received for {location_name}")
+            return None
+        return data
     except Exception as e:
-        logging.error("Error while fetching data: %s", e)
-        sys.exit(1)
+        logging.error(f"Error while fetching data for {location_name}: {e}")
+        return None
 
-    # Validate that data was returned
-    if data.empty:
-        logging.error("No data received. Feasibility test failed.")
+def run_feasibility_test():
+    # Test locations
+    locations = [
+        {
+            'name': 'Koh Phangan',
+            'lat': 9.7387,
+            'lon': 100.0603,
+            'start': datetime.datetime(2022, 3, 10),
+            'end': datetime.datetime(2022, 3, 20)
+        },
+        {
+            'name': 'Novosibirsk',
+            'lat': 55.05,  # 55°03′N
+            'lon': 82.95,  # 82°57′E
+            'start': datetime.datetime(2020, 2, 1),
+            'end': datetime.datetime(2020, 2, 10)
+        },
+        {
+            'name': 'Baghdad',
+            'lat': 33.31528,  # 33°18′55″N
+            'lon': 44.36611,  # 44°21′58″E
+            'start': datetime.datetime(2020, 8, 1),
+            'end': datetime.datetime(2020, 8, 10)
+        }
+    ]
+
+    success = True
+    results = {}
+
+    for loc in locations:
+        data = fetch_weather_data(
+            loc['name'],
+            loc['lat'],
+            loc['lon'],
+            loc['start'],
+            loc['end']
+        )
+        
+        if data is None:
+            success = False
+        else:
+            results[loc['name']] = {
+                'coordinates': f"{loc['lat']}°, {loc['lon']}°",
+                'date_range': f"{loc['start'].date()} to {loc['end'].date()}",
+                'data': data
+            }
+            logging.info(f"\nResults for {loc['name']}:")
+            logging.info(f"  Temperature range: {data['tavg'].min():.1f}°C to {data['tavg'].max():.1f}°C")
+            logging.info(f"  Average temperature: {data['tavg'].mean():.1f}°C")
+            logging.info(f"  Min/Max recorded: {data['tmin'].min():.1f}°C to {data['tmax'].max():.1f}°C")
+            logging.info(f"  Total precipitation: {data['prcp'].sum():.1f}mm")
+            logging.info(f"  Days with precipitation: {(data['prcp'] > 0).sum()}")
+
+    if not success:
+        logging.error("Feasibility test failed for one or more locations")
         sys.exit(1)
-    else:
-        logging.info("Feasibility test succeeded. Data received:")
-        print(data)
+    
+    logging.info("Feasibility test completed successfully for all locations")
 
 if __name__ == '__main__':
     run_feasibility_test()

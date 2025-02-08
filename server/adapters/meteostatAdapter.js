@@ -12,6 +12,15 @@ const logger = winston.createLogger({
   ]
 });
 
+// Meteostat API configuration
+const METEOSTAT_CONFIG = {
+  baseURL: 'https://meteostat.p.rapidapi.com',
+  headers: {
+    'x-rapidapi-host': 'meteostat.p.rapidapi.com',
+    'x-rapidapi-key': '11291be2bbmshadcc6301ebde779p16effcjsnb77fb8704911'
+  }
+};
+
 /**
  * fetchHistoricalData - Retrieves historical weather data from Meteostat.
  *
@@ -29,53 +38,48 @@ const logger = winston.createLogger({
  */
 async function fetchHistoricalData(location, startDate, days) {
   try {
-    // Log the API call request
-    logger.info(`Fetching Meteostat data for location ${JSON.stringify(location)}, startDate: ${startDate}, days: ${days}`);
-    
-    // Simulate an API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Calculate end date based on start date and number of days
+    const start = new Date(startDate);
+    const end = new Date(start);
+    end.setDate(end.getDate() + days - 1);
 
-    // Generate dummy data for the specified number of days
-    const dummyData = [];
-    const startTime = new Date(startDate).getTime();
-    const oneDay = 86400000; // milliseconds in one day
+    // Format dates for API request
+    const startStr = start.toISOString().split('T')[0];
+    const endStr = end.toISOString().split('T')[0];
 
-    for (let i = 0; i < days; i++) {
-      const date = new Date(startTime + i * oneDay).toISOString().split('T')[0];
-      dummyData.push({
-        date,
-        tavg: 28 + i * 0.1,  // simulated average temperature
-        tmin: 25 + i * 0.1,  // simulated minimum temperature
-        tmax: 30 + i * 0.1,  // simulated maximum temperature
-        prcp: null         // no precipitation data in dummy response
-      });
-    }
+    logger.info(`Fetching Meteostat data for location (${location.lat}, ${location.lon}) from ${startStr} to ${endStr}`);
 
-    return {
-      location,
-      startDate,
-      days,
-      data: dummyData
-    };
-
-    // --- For a real API call, uncomment and adjust the following ---
-    /*
-    const response = await axios.get('https://api.meteostat.net/v2/point/daily', {
+    // Make API request
+    const response = await axios.get('/point/daily', {
+      ...METEOSTAT_CONFIG,
       params: {
         lat: location.lat,
         lon: location.lon,
-        start: formatDate(startDate), // You can implement formatDate as needed
-        end: formatDate(new Date(new Date(startDate).getTime() + (days - 1) * oneDay)),
-        // Include your API key and any additional parameters required by Meteostat
+        start: startStr,
+        end: endStr
       }
     });
+
+    if (!response.data || !response.data.data) {
+      throw new Error('Invalid response from Meteostat API');
+    }
+
+    // Transform API response to match our application's format
+    const weatherData = response.data.data.map(day => ({
+      date: day.date,
+      tavg: day.tavg,
+      tmin: day.tmin,
+      tmax: day.tmax,
+      prcp: day.prcp
+    }));
+
+
     return {
       location,
       startDate,
       days,
-      data: response.data.data
+      data: weatherData
     };
-    */
   } catch (error) {
     logger.error(`Error fetching Meteostat data: ${error.message}`);
     throw new Error(`Meteostat API error: ${error.message}`);

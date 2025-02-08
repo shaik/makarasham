@@ -29,30 +29,82 @@
  * @returns {number} result.data[].tmax - Maximum temperature
  * @returns {number|null} result.data[].prcp - Precipitation amount
  */
+function getSeasonalBaseTemperature(date, latitude) {
+  const month = new Date(date).getMonth();
+  const absLat = Math.abs(latitude);
+  
+  // Determine if it's summer or winter in this hemisphere
+  const isNorthernHemisphere = latitude >= 0;
+  const isSummerMonth = month >= 5 && month <= 7;  // June-August
+  const isWinterMonth = month <= 1 || month >= 11; // December-February
+  
+  // Summer in this hemisphere
+  if ((isNorthernHemisphere && isSummerMonth) || (!isNorthernHemisphere && !isSummerMonth)) {
+    if (absLat < 23.5) return 30; // Tropical
+    if (absLat < 45) return 25;  // Temperate
+    return 20;                    // Subarctic
+  }
+  
+  // Winter in this hemisphere
+  if ((isNorthernHemisphere && isWinterMonth) || (!isNorthernHemisphere && !isWinterMonth)) {
+    if (absLat < 23.5) return 25; // Tropical
+    if (absLat < 45) return 5;    // Temperate
+    return -10;                   // Subarctic
+  }
+  
+  // Spring/Fall
+  if (absLat < 23.5) return 28; // Tropical
+  if (absLat < 45) return 15;   // Temperate
+  return 5;                     // Subarctic
+}
+
+function getWeatherCondition(baseTemp, dayOfYear) {
+  const conditions = [
+    { temp: -10, possibilities: ['snow', 'cloudy', 'partly cloudy'] },
+    { temp: 0, possibilities: ['snow', 'light rain', 'cloudy', 'partly cloudy'] },
+    { temp: 10, possibilities: ['light rain', 'cloudy', 'partly cloudy', 'sunny'] },
+    { temp: 20, possibilities: ['partly cloudy', 'sunny', 'light rain'] },
+    { temp: 30, possibilities: ['sunny', 'partly cloudy'] }
+  ];
+  
+  // Find appropriate conditions for this temperature
+  const applicableConditions = conditions.reduce((prev, curr) => 
+    Math.abs(curr.temp - baseTemp) < Math.abs(prev.temp - baseTemp) ? curr : prev
+  ).possibilities;
+  
+  // Use day of year to add some determinism to the "random" selection
+  return applicableConditions[dayOfYear % applicableConditions.length];
+}
+
 async function getHistoricalData(location, startDate, days) {
-  // Generate dummy data for the specified number of days
   const dummyData = [];
   const startTime = new Date(startDate).getTime();
   const oneDay = 86400000; // Number of milliseconds in a day
-
-  // Define possible weather conditions
-  const conditions = ['sunny', 'partly cloudy', 'cloudy', 'light rain', 'fog', 'snow'];
-
+  
   for (let i = 0; i < days; i++) {
-    // Calculate the date for each day and format it as "YYYY-MM-DD"
-    const date = new Date(startTime + i * oneDay).toISOString().split('T')[0];
+    const currentDate = new Date(startTime + i * oneDay);
+    const dayOfYear = Math.floor((currentDate - new Date(currentDate.getFullYear(), 0, 0)) / oneDay);
     
-    // Generate random precipitation for some conditions
-    const condition = conditions[i % conditions.length];
+    // Get base temperature for this location and season
+    const baseTemp = getSeasonalBaseTemperature(currentDate, location.lat);
+    
+    // Add daily variation (-3 to +3 degrees)
+    const dailyVariation = Math.sin(dayOfYear * 0.017) * 3;
+    
+    // Add random variation (-2 to +2 degrees)
+    const randomVariation = (Math.random() * 4) - 2;
+    
+    const avgTemp = baseTemp + dailyVariation + randomVariation;
+    const condition = getWeatherCondition(baseTemp, dayOfYear);
     const hasPrecipitation = ['light rain', 'snow'].includes(condition);
     
     dummyData.push({
-      date,
-      tavg: 28.0 + i * 0.1, // Example dummy average temperature
-      tmin: 25.0 + i * 0.1, // Example dummy minimum temperature
-      tmax: 30.0 + i * 0.1, // Example dummy maximum temperature
-      prcp: hasPrecipitation ? Math.random() * 10 : null, // Random precipitation for rain/snow
-      condition // Add weather condition
+      date: currentDate.toISOString().split('T')[0],
+      tavg: Number(avgTemp.toFixed(1)),
+      tmin: Number((avgTemp - 5 + (Math.random() * 2)).toFixed(1)),
+      tmax: Number((avgTemp + 5 + (Math.random() * 2)).toFixed(1)),
+      prcp: hasPrecipitation ? Number((Math.random() * 15).toFixed(1)) : null,
+      condition
     });
   }
 
